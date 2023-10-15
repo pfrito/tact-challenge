@@ -20,6 +20,7 @@ import "@stdlib/deploy";
    - SC should check that incoming tx TON value is enough for NFT withdrawal. Specifically, at least: (1 + totalNftsHeld * 0.08) TONs. Otherwise throw "Insufficent funds"
    - SC should check that sender is the admin, throw "Invalid sender" otherwise
    - If all checks pass, SC should send NFTs one by one to the admin 
+   - SC should be able to withdraw all NFTs by a single message from admin
   * OwnershipAssigned 
    - if prevOwner is the owner's (admin) address, then add NFT to the collection
    - if value of TON attached is less then 2.1 TON then stop execution and return NFT back,
@@ -36,7 +37,7 @@ import "@stdlib/deploy";
      the order of NFTs in this dictionary doesn't matter
 */
 
-message AdminWithdrawalFees {
+message AdminWithdrawalProfit {
   queryId: Int as uint64;
 }
 
@@ -44,7 +45,7 @@ message AdminWithdrawalAllNFTs {
   queryId: Int as uint64;
 }
 
-message AdminFetchFees {
+message AdminFetchProfit {
   queryId: Int as uint64;
 }
 
@@ -75,7 +76,7 @@ contract Task5 with Deployable {
   receive(msg: OwnershipAssigned) {
   }
 
-  receive(msg: AdminWithdrawalFees) {
+  receive(msg: AdminWithdrawalProfit) {
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {

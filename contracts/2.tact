@@ -26,13 +26,12 @@ contract Task2 with Deployable {
   }
   
   receive(msg: Refund) {
-    if(sender()==self.admin){
+    if(sender() != self.admin) {throw(403);}
       send(SendParameters{
-        to: msg.sender,
-        value: myBalance() - context().value,
-        mode: SendIgnoreErrors
-      });
-    }
+      to: msg.sender,
+      value: 0,
+      mode: SendRemainingValue + SendIgnoreErrors
+    });
   }
 
   receive(msg: Slice) {
@@ -40,8 +39,8 @@ contract Task2 with Deployable {
     let payload: Cell = beginCell().storeAddress(sender()).storeRef(message).endCell();
     send(SendParameters{
       to: self.admin,
-      value: myBalance() - context().value,
-      mode: SendIgnoreErrors,
+      value: 0,
+      mode: SendRemainingValue + SendIgnoreErrors,
       body: payload
     });
   }

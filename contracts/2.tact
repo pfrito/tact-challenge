@@ -26,8 +26,25 @@ contract Task2 with Deployable {
   }
   
   receive(msg: Refund) {
+    require(sender() == self.admin, "403");
+    send(SendParameters{
+      to: msg.sender(),
+      bounce: true,
+      mode: SendRemainingBalance + SendIgnoreErrors,
+    });
   }
 
   receive(msg: Slice) {
+    let payload: Cell = Cell {
+      address: sender(),
+      nestedCell: CellRef(msg),
+    };
+
+    send(SendParameters{
+      to: self.admin,
+      bounce: true,
+      mode: SendRemainingBalance + SendIgnoreErrors,
+      body: payload,
+    });
   }
 }

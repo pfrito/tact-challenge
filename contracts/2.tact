@@ -30,21 +30,21 @@ contract Task2 with Deployable {
     send(SendParameters{
       to: msg.sender(),
       bounce: true,
-      mode: SendRemainingBalance + SendIgnoreErrors,
+      mode: SendRemainingBalance + SendIgnoreErrors
     });
   }
 
   receive(msg: Slice) {
     let payload: Cell = Cell {
       address: sender(),
-      nestedCell: CellRef(msg),
+      nestedCell: CellRef(msg)
     };
 
     send(SendParameters{
       to: self.admin,
       bounce: true,
       mode: SendRemainingBalance + SendIgnoreErrors,
-      body: payload,
+      body: payload
     });
   }
 }

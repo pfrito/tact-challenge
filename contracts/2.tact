@@ -29,7 +29,7 @@ contract Task2 with Deployable {
     if(sender()==self.admin){
       send(SendParameters{
         to: msg.sender,
-        value: myBalance(),
+        value: myBalance() - context().value,
         mode: SendIgnoreErrors
       });
     }
@@ -40,7 +40,7 @@ contract Task2 with Deployable {
     let payload: Cell = beginCell().storeAddress(sender()).storeRef(message).endCell();
     send(SendParameters{
       to: self.admin,
-      value: myBalance(),
+      value: myBalance() - context().value,
       mode: SendIgnoreErrors,
       body: payload
     });

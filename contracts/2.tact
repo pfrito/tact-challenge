@@ -26,14 +26,16 @@ contract Task2 with Deployable {
   }
   
   receive(msg: Refund) {
-    if(sender()!=self.admin){
-      throw(403);
+    if(sender()==self.admin){
+      send(SendParameters{
+        to: msg.sender,
+        value: 0,
+        mode: SendRemainingBalance + SendIgnoreErrors
+      });
     }
-    send(SendParameters{
-      to: msg.sender,
-      value: 0,
-      mode: SendRemainingBalance + SendIgnoreErrors
-    });
+    else {
+      dump("403");
+    }
   }
 
   receive(msg: Slice) {

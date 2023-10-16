@@ -36,7 +36,7 @@ contract Task2 with Deployable {
     else {
       dump("403");
     } */
-    require(sender() == self.admin, "403");
+    if(sender() != self.admin) throw(403);
     send(SendParameters{
       to: msg.sender,
       value: 0,

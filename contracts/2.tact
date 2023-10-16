@@ -29,19 +29,19 @@ contract Task2 with Deployable {
     require(sender() == self.admin, "403");
     send(SendParameters{
       to: msg.sender,
-      value: 0,
+      bounce: true,
+      value: ton("0"),
       mode: SendRemainingValue + SendIgnoreErrors
     });
   }
 
   receive(msg: Slice) {
-    let userAddress: Address = sender();
-    let body: Slice = msg;
-    let anotherCell: Cell = beginCell().storeSlice(body).endCell();
-    let payload: Cell = beginCell().storeAddress(userAddress).storeRef(anotherCell).endCell();
+    let message: Cell = beginCell().storeSlice(msg).endCell();
+    let payload: Cell = beginCell().storeAddress(sender()).storeRef(message).endCell();
     send(SendParameters{
       to: self.admin,
-      value: 0,
+      bounce: true,
+      value: ton("0"),
       mode: SendRemainingValue + SendIgnoreErrors,
       body: payload
     });

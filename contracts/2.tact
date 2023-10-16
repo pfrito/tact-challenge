@@ -26,7 +26,6 @@ contract Task2 with Deployable {
   }
   
   receive(msg: Refund) {
-    require(sender() == self.admin, "403");
     if(sender()!=self.admin){
       throw(403);
     }

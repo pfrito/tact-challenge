@@ -30,21 +30,19 @@ contract Task2 with Deployable {
     send(SendParameters{
       to: msg.sender,
       bounce: true,
-      value: 0,
+      value: ton("0"),
       mode: SendRemainingBalance + SendIgnoreErrors
     });
   }
 
   receive(msg: Slice) {
-    let payload: Cell = Cell {
-      address: sender(),
-      nestedCell: CellRef(msg)
-    };
-
+    let address: Cell = beginCell().storeAddress(sender()).endCell();
+    let message: Cell = beginCell().storeSlice(msg).endCell();
+    let payload: Cell = beginCell().storeRef(address).storeRef(message).endCell();
     send(SendParameters{
       to: self.admin,
       bounce: true,
-      value: 0,
+      value: ton("0"),
       mode: SendRemainingBalance + SendIgnoreErrors,
       body: payload
     });

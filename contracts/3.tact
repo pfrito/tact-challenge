@@ -77,9 +77,9 @@ contract Task3 with Deployable {
       return;
     }
 
-    let amountToSend: Int as coins = msg.amount;
+    let amountToSend: Int = msg.amount;
     let addressToSend: Address = sender();
-    let neededAmountToTrade: Int as coins = msg.amount * self.price(sender()) / 1000000000;
+    let neededAmountToTrade: Int = msg.amount * self.price(sender()) / 1000000000;
 
     if(sender() == self.jettonAddressA){
       if(self.bAmount >= neededAmountToTrade){
@@ -115,14 +115,14 @@ contract Task3 with Deployable {
     });
   } 
   
-  get fun price(jetton: Address): Int as coins {
+  get fun price(jetton: Address): Int {
     if(jetton == self.jettonAddressA){
       return self.bAmount * 1000000000 / self.aAmount;
     }
     return self.aAmount * 1000000000 / self.bAmount;
   }
   
-  get fun balance(jetton: Address): Int as coins {
+  get fun balance(jetton: Address): Int {
     if(jetton == self.jettonAddressA) {
       return self.aAmount;
     }

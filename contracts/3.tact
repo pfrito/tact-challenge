@@ -74,6 +74,7 @@ contract Task3 with Deployable {
       } else {
         self.bAmount = self.bAmount + msg.amount;
       }
+      return;
     }
 
     let amountToSend: Int = msg.amount;

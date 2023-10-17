@@ -56,7 +56,6 @@ contract Task3 with Deployable {
   bAmount: Int;
   jettonAddressA: Address;
   jettonAddressB: Address;
-  decimal: Int;
 
   init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address) {
     self.owner = admin;
@@ -64,15 +63,69 @@ contract Task3 with Deployable {
     self.jettonAddressB = newJettonAddressB;
     self.aAmount = 0;
     self.bAmount = 0;
-    self.decimal = 1000000000;
   }
 
   receive(msg: TokenNotification) {
+    require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "These jettons can't be traded");
+
+    if(msg.from == self.owner) {
+      if(sender() == self.jettonAddressA) {
+        self.aAmount = self.aAmount + msg.amount;
+      } else {
+        self.bAmount = self.bAmount + msg.amount;
+      }
+      return;
+    }
+
+    let amountToSend: Int = msg.amount;
+    let addressToSend: Address = sender();
+    let neededAmountToTrade: Int = msg.amount * self.price(sender()) / 1000000000;
+
+    if(sender() == self.jettonAddressA){
+      if(self.bAmount >= neededAmountToTrade){
+        self.aAmount = self.aAmount + msg.amount;
+        self.bAmount = self.bAmount - neededAmountToTrade;
+        amountToSend = neededAmountToTrade;
+        addressToSend = self.jettonAddressB;
+      }
+    }
+    else{
+      if(self.aAmount >= neededAmountToTrade){
+        self.bAmount = self.bAmount + msg.amount;
+        self.aAmount = self.aAmount - neededAmountToTrade;
+        amountToSend = neededAmountToTrade;
+        addressToSend = self.jettonAddressA;
+      }
+    }
+
+    let body: Cell = TokenTransfer{
+      queryId: 0,
+      amount: amountToSend,
+      destination: msg.from,
+      responseDestination: myAddress(),
+      customPayload: null,
+      forwardTonAmount: ton("0.01"),
+      forwardPayload: emptySlice()
+    }.toCell();
+    send(SendParameters{
+      to: addressToSend,
+      value: ton("0"),
+      mode: SendRemainingBalance + SendIgnoreErrors,
+      body: body
+    });
   } 
   
-  get fun price(jetton: Address): Int { 
+  get fun price(jetton: Address): Int {
+    if(jetton == self.jettonAddressA){
+      return self.bAmount * 1000000000 / self.aAmount;
+    }
+    return self.aAmount * 1000000000 / self.bAmount;
   }
   
-  get fun balance(jetton: Address): Int { 
+  get fun balance(jetton: Address): Int {
+    if(jetton == self.jettonAddressA) {
+      return self.aAmount;
+    }
+    return self.bAmount;
   }
 }

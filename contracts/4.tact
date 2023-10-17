@@ -98,6 +98,9 @@ contract Task4 with Deployable {
         mode: SendRemainingBalance + SendIgnoreErrors,
         body: body
       });
+      self.nftAddress = null;
+      self.nftOwner = null;
+      self.holdTime = 0;
     }
     else{
       send(SendParameters{

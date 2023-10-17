@@ -48,23 +48,86 @@ message NftWithdrawal {
 
 contract Task4 with Deployable {
   seed: Int as uint128;
+  holdTime: Int as uint32;
+  nftAddress: Address?;
+  nftOwner: Address?;
   
   init(seed: Int) {
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
+    self.holdTime = 0;
   }
 
   receive(msg: OwnershipAssigned) {
+    if(self.holdTime == 0){
+      self.nftAddress = sender();
+      self.holdTime = msg.forwardPayload.loadUint(32) + now();
+      self.nftOwner = msg.prevOwner;
+    }
+    else{
+      let body: Cell = Transfer{
+       queryId: msg.queryId,
+       newOwner: msg.prevOwner,
+       responseDestination: msg.prevOwner,
+       customPayload: null,
+       forwardAmount: ton("0"),
+       forwardPayload: emptyCell().asSlice()
+      }.toCell();
+      send(SendParameters{
+        to: sender(),
+        value: ton("0"), 
+        mode: SendRemainingBalance + SendIgnoreErrors,
+        body: body
+      });
+    }
   }
 
   receive(msg: NftWithdrawal) {
+    require(self.nftOwner == sender(),"Invalid sender");
+    if(self.holdTime - now() <= 0){
+       let body: Cell = Transfer{
+       queryId: msg.queryId,
+       newOwner: sender(),
+       responseDestination: sender(),
+       customPayload: null,
+       forwardAmount: ton("0"),
+       forwardPayload: emptyCell().asSlice()
+      }.toCell();
+      send(SendParameters{
+        to: msg.nftAddress,
+        value: ton("0"), 
+        mode: SendRemainingBalance + SendIgnoreErrors,
+        body: body
+      });
+    }
+    else{
+      send(SendParameters{
+          to: sender(),
+          value: ton("0"), 
+          mode: SendRemainingBalance + SendIgnoreErrors, 
+          body: "NFT is still locked".asComment()
+      });
+    }
   }
 
   get fun time(): Int {
+    return max(self.holdTime - now(), 0);
   }
 
   get fun nft(): Address? {
+    if(self.nftAddress != null){
+      return self.nftAddress!!;
+    }
+    else{
+      return null;
+    }
   }
 
   get fun owner(): Address? {
+    if(self.nftOwner != null){
+      return self.nftOwner!!;
+    }
+    else{
+      return null;
+    }
   }
 }

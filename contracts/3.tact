@@ -52,8 +52,8 @@ message(0xf8a7ea5) TokenTransfer {
 
 contract Task3 with Deployable {
   owner: Address;
-  aAmount: Int;
-  bAmount: Int;
+  aAmount: Int as coins;
+  bAmount: Int as coins;
   jettonAddressA: Address;
   jettonAddressB: Address;
 
@@ -77,9 +77,9 @@ contract Task3 with Deployable {
       return;
     }
 
-    let amountToSend: Int = msg.amount;
+    let amountToSend: Int as coins = msg.amount;
     let addressToSend: Address = sender();
-    let neededAmountToTrade: Int = msg.amount * self.price(sender()) / 1000000000;
+    let neededAmountToTrade: Int as coins = msg.amount * self.price(sender()) / 1000000000;
 
     if(sender() == self.jettonAddressA){
       if(self.bAmount >= neededAmountToTrade){
@@ -115,14 +115,14 @@ contract Task3 with Deployable {
     });
   } 
   
-  get fun price(jetton: Address): Int {
+  get fun price(jetton: Address): Int as coins {
     if(jetton == self.jettonAddressA){
       return self.bAmount * 1000000000 / self.aAmount;
     }
     return self.aAmount * 1000000000 / self.bAmount;
   }
   
-  get fun balance(jetton: Address): Int {
+  get fun balance(jetton: Address): Int as coins {
     if(jetton == self.jettonAddressA) {
       return self.aAmount;
     }

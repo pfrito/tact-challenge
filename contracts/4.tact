@@ -73,6 +73,12 @@ contract Task4 with Deployable {
        forwardPayload: emptyCell().asSlice()
       }.toCell();
       self.reply(body);
+      send(SendParameters{
+        to: sender(),
+        value: ton("0"), 
+        mode: SendRemainingVale + SendIgnoreErrors,
+        body: body
+      });
     }
   }
 

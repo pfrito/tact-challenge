@@ -67,24 +67,84 @@ message(0x5fcc3d14) Transfer {
 contract Task5 with Deployable {
   seed: Int as uint128;
   owner: Address;
+  nftCollection: map<Int as uint16, Address>;
+  totalNftsHeld: Int as uint16;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
+    self.totalNftsHeld = 0;
   }
 
   receive(msg: OwnershipAssigned) {
+    if(msg.prevOwner == self.owner){
+      self.nftCollection.set(self.totalNftsHeld, sender());
+      self.totalNftsHeld = self.totalNftsHeld + 1;
+      return;
+    }
+    if(context().value <= ton("2.1")){
+      let body: Cell = Transfer{
+       queryId: msg.queryId,
+       newOwner: msg.prevOwner,
+       responseDestination: msg.prevOwner,
+       customPayload: null,
+       forwardAmount: ton("0"),
+       forwardPayload: emptyCell().asSlice()
+      }.toCell();
+      send(SendParameters{
+        to: sender(),
+        value: ton("0"), 
+        mode: SendRemainingValue + SendIgnoreErrors,
+        body: body
+      });
+      return;
+    }
   }
 
-  receive(msg: AdminWithdrawalProfit) {
+  receive(msg: AdminWithdrawalProfit) { 
+    require(sender() == self.owner, "Insufficient privelegies");
+    let body: Cell = AdminWithdrawalProfit{
+      queryId: msg.queryId
+    }.toCell();
+    send(SendParameters{
+      to: self.owner,
+      value: self.profit(), 
+      mode: SendRemainingValue + SendIgnoreErrors,
+      body: body
+    });
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
+    let minimumFunds: Int = (1 + self.totalNftsHeld * ton("0.08"));
+    require(context().value >= minimumFunds, "Insufficent funds");
+    require(sender() == self.owner, "Invalid sender");
+    let i: Int = 0;
+    repeat (self.totalNftsHeld) {
+      let body: Cell = Transfer{
+        queryId: msg.queryId,         
+        newOwner: self.owner, 
+        responseDestination: self.owner, 
+        customPayload: null,
+        forwardAmount: ton("0"),
+        forwardPayload: emptyCell().asSlice()
+      }.toCell();
+      send(SendParameters{
+        to: self.nftCollection.get(i)!!,
+        value: ton("0"), 
+        mode: SendRemainingValue + SendIgnoreErrors,
+        body: body
+      });
+      self.nftCollection.set(i, null);
+      i = i + 1;
+    }
+    self.totalNftsHeld = 0;
   }
 
-  get fun profit(): Int { 
+  get fun profit(): Int {
+    return myBalance() - ton("0.1");
   }
   
   get fun nfts(): map<Int as uint16, Address> { 
+    return self.nftCollection;
   }
 }

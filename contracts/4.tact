@@ -72,7 +72,6 @@ contract Task4 with Deployable {
        forwardAmount: ton("0"),
        forwardPayload: emptyCell().asSlice()
       }.toCell();
-      self.reply(body);
       send(SendParameters{
         to: sender(),
         value: ton("0"), 

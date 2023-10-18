@@ -83,20 +83,22 @@ contract Task5 with Deployable {
       return;
     }
     if(context().value <= ton("2.1")){
-      let body: Cell = Transfer{
-       queryId: msg.queryId,
-       newOwner: msg.prevOwner,
-       responseDestination: msg.prevOwner,
-       customPayload: null,
-       forwardAmount: ton("0"),
-       forwardPayload: emptyCell().asSlice()
-      }.toCell();
-      send(SendParameters{
-        to: sender(),
-        value: context().value, 
-        mode: SendIgnoreErrors,
-        body: body
-      });
+      if(context().value >= ton("0.1")){
+        let body: Cell = Transfer{
+        queryId: msg.queryId,
+        newOwner: msg.prevOwner,
+        responseDestination: msg.prevOwner,
+        customPayload: null,
+        forwardAmount: ton("0"),
+        forwardPayload: emptyCell().asSlice()
+        }.toCell();
+        send(SendParameters{
+          to: sender(),
+          value: ton("0"), 
+          mode: SendRemainingValue + SendIgnoreErrors,
+          body: body
+        });
+      }
       return;
     }
   }

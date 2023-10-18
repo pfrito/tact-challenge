@@ -69,11 +69,13 @@ contract Task5 with Deployable {
   owner: Address;
   nftCollection: map<Int as uint16, Address>;
   totalNftsHeld: Int as uint16;
+  feesCollected: Int as uint16;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     self.totalNftsHeld = 0;
+    self.feesCollected = 0;
   }
 
   receive(msg: OwnershipAssigned) {
@@ -82,25 +84,46 @@ contract Task5 with Deployable {
       self.totalNftsHeld = self.totalNftsHeld + 1;
       return;
     }
-    if(context().value <= ton("2.1")){
-      if(context().value >= ton("0.1")){
-        let body: Cell = Transfer{
+    if(context().value < ton("2.1")){
+      let body: Cell = Transfer{
         queryId: msg.queryId,
         newOwner: msg.prevOwner,
         responseDestination: msg.prevOwner,
         customPayload: null,
         forwardAmount: ton("0"),
         forwardPayload: emptyCell().asSlice()
-        }.toCell();
-        send(SendParameters{
-          to: sender(),
-          value: ton("0"), 
-          mode: SendRemainingValue + SendIgnoreErrors,
-          body: body
-        });
-      }
+      }.toCell();
+      send(SendParameters{
+        to: sender(),
+        value: myBalance() - self.profit(), 
+        mode: SendRemainingValue + SendIgnoreErrors,
+        body: body
+      });
       return;
     }
+
+    self.feesCollected = self.feesCollected + ton("2");
+    let nftToWithdraw: Int = random(0, self.totalNftsHeld);
+    let to: Address = sender();
+
+    if(nftToWithdraw != self.totalNftsHeld){
+      to = self.nftCollection.get(nftToWithdraw)!!;
+      self.nftCollection.set(nftToWithdraw, sender());
+    }
+    let body: Cell = Transfer{
+      queryId: msg.queryId,
+      newOwner: msg.prevOwner,
+      responseDestination: msg.prevOwner,
+      customPayload: null,
+      forwardAmount: ton("0"),
+      forwardPayload: emptyCell().asSlice()
+    }.toCell();
+    send(SendParameters{
+      to: to,
+      value: ton("0"), 
+      mode: SendRemainingValue + SendIgnoreErrors,
+      body: body
+    });
   }
 
   receive(msg: AdminWithdrawalProfit) { 
@@ -143,7 +166,7 @@ contract Task5 with Deployable {
   }
 
   get fun profit(): Int {
-    return myBalance() - ton("0.1");
+    return self.feesCollected - ton("0.1");
   }
   
   get fun nfts(): map<Int as uint16, Address> { 

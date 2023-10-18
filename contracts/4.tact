@@ -76,7 +76,7 @@ contract Task4 with Deployable {
       send(SendParameters{
         to: sender(),
         value: ton("0"), 
-        mode: SendRemainingValue + SendIgnoreErrors,
+        mode: SendRemainingBalance + SendIgnoreErrors,
         body: body
       });
     }

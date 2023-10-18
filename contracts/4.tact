@@ -72,19 +72,14 @@ contract Task4 with Deployable {
        forwardAmount: ton("0"),
        forwardPayload: emptyCell().asSlice()
       }.toCell();
-      send(SendParameters{
-        to: sender(),
-        value: ton("0"), 
-        mode: SendRemainingBalance + SendIgnoreErrors,
-        body: body
-      });
+      self.reply(body);
     }
   }
 
   receive(msg: NftWithdrawal) {
     require(self.nftOwner == sender(),"Invalid sender");
     if(self.holdTime - now() <= 0){
-       let body: Cell = Transfer{
+      let body: Cell = Transfer{
        queryId: msg.queryId,
        newOwner: sender(),
        responseDestination: sender(),

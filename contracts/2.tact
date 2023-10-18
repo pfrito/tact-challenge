@@ -27,7 +27,11 @@ contract Task2 with Deployable {
   
   receive(msg: Refund) {
     require(sender() == self.admin, "403");
-    self.reply(emptyCell());
+    send(SendParameters{
+      to: msg.sender,
+      value: ton("0"),
+      mode: SendRemainingValue + SendIgnoreErrors
+    });
   }
 
   receive(msg: Slice) {

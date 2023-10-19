@@ -75,7 +75,6 @@ contract Task5 with Deployable {
     self.owner = owner;
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     self.totalNftsHeld = 0;
-    self.feesCollected = 0;
   }
 
   receive(msg: OwnershipAssigned) {
@@ -85,24 +84,25 @@ contract Task5 with Deployable {
       return;
     }
     if(context().value < ton("2.1")){
-      let body: Cell = Transfer{
-        queryId: msg.queryId,
-        newOwner: msg.prevOwner,
-        responseDestination: msg.prevOwner,
-        customPayload: null,
-        forwardAmount: ton("0"),
-        forwardPayload: emptyCell().asSlice()
-      }.toCell();
-      send(SendParameters{
-        to: sender(),
-        value: myBalance() - self.profit(), 
-        mode: SendRemainingValue + SendIgnoreErrors,
-        body: body
-      });
+      if(context().value >= ton("0.1")){
+        let body: Cell = Transfer{
+          queryId: msg.queryId,
+          newOwner: msg.prevOwner,
+          responseDestination: msg.prevOwner,
+          customPayload: null,
+          forwardAmount: ton("0"),
+          forwardPayload: emptyCell().asSlice()
+        }.toCell();
+        send(SendParameters{
+          to: sender(),
+          value: ton("0"), 
+          mode: SendRemainingValue + SendIgnoreErrors,
+          body: body
+        });
+      }
       return;
     }
 
-    self.feesCollected = self.feesCollected + ton("2");
     let nftToWithdraw: Int = random(0, self.totalNftsHeld);
     let to: Address = sender();
 
@@ -110,6 +110,7 @@ contract Task5 with Deployable {
       to = self.nftCollection.get(nftToWithdraw)!!;
       self.nftCollection.set(nftToWithdraw, sender());
     }
+    
     let body: Cell = Transfer{
       queryId: msg.queryId,
       newOwner: msg.prevOwner,
@@ -128,7 +129,7 @@ contract Task5 with Deployable {
 
   receive(msg: AdminWithdrawalProfit) { 
     require(sender() == self.owner, "Insufficient privelegies");
-    let body: Cell = AdminWithdrawalProfit{
+    let body: Cell = AdminFetchProfit{
       queryId: msg.queryId
     }.toCell();
     send(SendParameters{
@@ -144,7 +145,7 @@ contract Task5 with Deployable {
     require(context().value >= minimumFunds, "Insufficent funds");
     require(sender() == self.owner, "Invalid sender");
     let i: Int = 0;
-    repeat (self.totalNftsHeld) {
+    while (i<self.totalNftsHeld) {
       let body: Cell = Transfer{
         queryId: msg.queryId,         
         newOwner: self.owner, 
@@ -162,11 +163,12 @@ contract Task5 with Deployable {
       self.nftCollection.set(i, null);
       i = i + 1;
     }
+    /* self.nftCollection = emptyMap(); */
     self.totalNftsHeld = 0;
   }
 
   get fun profit(): Int {
-    return self.feesCollected - ton("0.1");
+    return myBalance() - ton("0.1");
   }
   
   get fun nfts(): map<Int as uint16, Address> { 

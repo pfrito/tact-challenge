@@ -159,10 +159,10 @@ contract Task5 with Deployable {
         mode: SendRemainingValue + SendIgnoreErrors,
         body: body
       });
-      self.nftCollection.set(i, null);
+      /* self.nftCollection.set(i, null); */
       i = i + 1;
     }
-    /* self.nftCollection = emptyMap(); */
+    self.nftCollection = emptyMap();
     self.totalNftsHeld = 0;
   }
 

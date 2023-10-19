@@ -102,10 +102,10 @@ contract Task5 with Deployable {
       return;
     }
 
-    let nftToWithdraw: Int = random(0, self.totalNftsHeld);
+    let nftToWithdraw: Int = random(0, self.totalNftsHeld - 1);
     let to: Address = sender();
 
-    if(nftToWithdraw != self.totalNftsHeld){
+    if(nftToWithdraw != self.totalNftsHeld - 1){
       to = self.nftCollection.get(nftToWithdraw)!!;
       self.nftCollection.set(nftToWithdraw, sender());
     }

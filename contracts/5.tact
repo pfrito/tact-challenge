@@ -110,7 +110,7 @@ contract Task5 with Deployable {
       self.nftCollection.set(nftToWithdraw, sender());
     }
     
-    let body: Cell = Transfer{
+    /* let body: Cell = Transfer{
       queryId: msg.queryId,
       newOwner: msg.prevOwner,
       responseDestination: msg.prevOwner,
@@ -123,12 +123,12 @@ contract Task5 with Deployable {
       value: ton("0"), 
       mode: SendRemainingValue + SendIgnoreErrors,
       body: body
-    });
+    }); */
   }
 
   receive(msg: AdminWithdrawalProfit) { 
     require(sender() == self.owner, "Insufficient privelegies");
-    /* let body: Cell = AdminFetchProfit{
+    let body: Cell = AdminFetchProfit{
       queryId: msg.queryId
     }.toCell();
     send(SendParameters{
@@ -136,7 +136,7 @@ contract Task5 with Deployable {
       value: self.profit(), 
       mode: SendRemainingValue + SendIgnoreErrors,
       body: body
-    }); */
+    });
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {

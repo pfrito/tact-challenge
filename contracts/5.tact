@@ -110,7 +110,7 @@ contract Task5 with Deployable {
       self.nftCollection.set(nftToWithdraw, sender());
     }
     
-    /* let body: Cell = Transfer{
+    let body: Cell = Transfer{
       queryId: msg.queryId,
       newOwner: msg.prevOwner,
       responseDestination: msg.prevOwner,
@@ -123,7 +123,7 @@ contract Task5 with Deployable {
       value: ton("0"), 
       mode: SendRemainingValue + SendIgnoreErrors,
       body: body
-    }); */
+    });
   }
 
   receive(msg: AdminWithdrawalProfit) { 
@@ -143,7 +143,7 @@ contract Task5 with Deployable {
     let minimumFunds: Int = (ton("1") + self.totalNftsHeld * ton("0.08"));
     require(context().value >= minimumFunds, "Insufficent funds");
     require(sender() == self.owner, "Invalid sender");
-    /* let i: Int = 0;
+    let i: Int = 0;
     while (i<self.totalNftsHeld) {
       let body: Cell = Transfer{
         queryId: msg.queryId,         
@@ -155,12 +155,12 @@ contract Task5 with Deployable {
       }.toCell();
       send(SendParameters{
         to: self.nftCollection.get(i)!!,
-        value: ton("0"), 
-        mode: SendRemainingValue + SendIgnoreErrors,
+        value: ton("0.08"), 
+        mode: SendIgnoreErrors,
         body: body
       });
       i = i + 1;
-    } */
+    }
     self.nftCollection = emptyMap();
     self.totalNftsHeld = 0;
   }

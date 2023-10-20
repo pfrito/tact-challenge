@@ -120,8 +120,8 @@ contract Task5 with Deployable {
     }.toCell();
     send(SendParameters{
       to: to,
-      value: ton("0"), 
-      mode: SendRemainingValue + SendIgnoreErrors,
+      value: ton("0.1"), 
+      mode: SendIgnoreErrors,
       body: body
     });
   }

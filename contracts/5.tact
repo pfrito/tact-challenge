@@ -69,11 +69,13 @@ contract Task5 with Deployable {
   owner: Address;
   nftCollection: map<Int as uint16, Address>;
   totalNftsHeld: Int as uint16;
+  feesCollected: Int as uint128;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     self.totalNftsHeld = 0;
+    self.feesCollected = 0;
   }
 
   receive(msg: OwnershipAssigned) {
@@ -101,6 +103,8 @@ contract Task5 with Deployable {
       }
       return;
     }
+
+    self.feesCollected = self.feesCollected + ton("2");
 
     let nftToWithdraw: Int = random(0, self.totalNftsHeld);
     let to: Address = sender();
@@ -137,6 +141,7 @@ contract Task5 with Deployable {
       mode: SendRemainingValue + SendIgnoreErrors,
       body: body
     });
+    self.feesCollected = ton("0.1");
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
@@ -166,7 +171,7 @@ contract Task5 with Deployable {
   }
 
   get fun profit(): Int {
-    return myBalance() - ton("0.1");
+    return self.feesCollected - ton("0.1");
   }
   
   get fun nfts(): map<Int as uint16, Address> { 

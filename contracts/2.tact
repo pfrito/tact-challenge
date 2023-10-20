@@ -33,6 +33,9 @@ contract Task2 with Deployable {
         mode: SendRemainingValue + SendIgnoreErrors
       });
     }
+    else{
+      dump("403");
+    }
   }
 
   receive(msg: Slice) {

@@ -79,7 +79,7 @@ contract Task3 with Deployable {
 
     let amountToSend: Int = msg.amount;
     let addressToSend: Address = sender();
-    let neededAmountToTrade: Int = msg.amount * self.price(sender()) / 1000000000;
+    let neededAmountToTrade: Int = msg.amount * (self.bAmount * 1000000000 / self.aAmount) / 1000000000;
 
     if(sender() == self.jettonAddressA){
       if(self.bAmount >= neededAmountToTrade){
@@ -90,6 +90,7 @@ contract Task3 with Deployable {
       }
     }
     else{
+      neededAmountToTrade = msg.amount * (self.aAmount * 1000000000 / self.bAmount) / 1000000000;
       if(self.aAmount >= neededAmountToTrade){
         self.bAmount = self.bAmount + msg.amount;
         self.aAmount = self.aAmount - neededAmountToTrade;
